@@ -852,9 +852,9 @@ void loop(){
 	//delay(1);
 	//digitalWrite(10, HIGH);
 	front_sensors = read_sensors();
-	if (remote_off) check_remote_off();
+	if (remote_off) check_remote_off();    //checks for stop command from remote
     //digitalWrite(10, LOW);
-	read_FIFO();
+	read_FIFO();                           //reads the gyro
 	//digitalWrite(10, HIGH);
 	front_sensors = read_sensors();
 	if (remote_off) check_remote_off();
