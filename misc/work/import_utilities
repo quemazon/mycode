@@ -1,0 +1,20 @@
+def import_wfm_current():
+        import numpy as np
+    from Tkinter import Tk
+    from tkFileDialog import askopenfilename
+    import os
+
+    tmp= []
+    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    os.system('c:/temp/ConvertTekWfm \"' + filename + '\" /CSV c:/temp/temp.csv')
+    from numpy import genfromtxt
+    tmp = genfromtxt('c:/temp/temp.csv', delimiter=',')
+    data = tmp[:,[3]]
+    data = np.append(data, (tmp[:,[4]]), axis=1)
+    ##data = np.append(data, (0-tmp[:,[4]]), axis=1)
+    ##var=np.where(data[:,[1]] >50)[0][0]
+    ##var=data[var][0]
+    ##data[:,[0]] = data[:,[0]] - var
+    return data
+   

@@ -1,0 +1,10 @@
+from pylab import *
+import matplotlib.pyplot as plt
+def makeplot(num):
+    plt.figure(num)
+    
+def v(plot, serial):
+    ax = plot.add_subplot(211)
+    ax.plot(serial.t,serial.v)
+    show(plot)
+

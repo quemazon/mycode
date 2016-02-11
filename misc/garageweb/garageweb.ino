@@ -58,7 +58,7 @@ void handleRoot() {
   </head>\
   <body>\
     <h1>Cyber Portal</h1>\
-    <p>Enter your passcode, intrepid explorer...</p>\
+    <p>Open</p>\
     <form action='passcode' method='get' id='pwform'>\
       Code: <input type='password' name='password'>\
     </form>\
@@ -93,8 +93,9 @@ void handleNotFound() {
 }
 
 void setup ( void ) {
-  pinMode ( led, OUTPUT );
-  digitalWrite ( led, 0 );
+  //pinMode ( led, OUTPUT );
+  pinMode (5, OUTPUT);
+  //digitalWrite ( led, 0 );
   Serial.begin ( 2400 );
   WiFi.begin ( ssid, password );
   Serial.println ( "" );
@@ -124,8 +125,12 @@ void setup ( void ) {
     String pwarg = server.arg(0);
     Serial.println(pwarg);
     Serial.println(pwarg.toInt());
-    if (pwarg.toInt()== 1234){
+    if (pwarg.toInt()== 68964){
       server.send ( 200, "text/plain", "Enter at your own risk!" );
+	  digitalWrite(5, HIGH);
+	  delay(1000);
+	  digitalWrite(5, LOW);
+	  
     }
     else {
       server.send ( 200, "text/plain", "Denied, Sir" );
@@ -139,4 +144,3 @@ void setup ( void ) {
 void loop ( void ) {
   server.handleClient();
 }
-
