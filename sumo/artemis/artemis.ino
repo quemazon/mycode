@@ -303,7 +303,7 @@ void line_detected() {
 void check_remote_off() {
 	if (digitalRead(IR_PIN) < 1) ir_counter++;
 	else ir_counter = 0;
-	if (ir_counter > 8) {
+	if (ir_counter > 5) {
 		stop_program();
 	}
 }
@@ -520,7 +520,7 @@ void ready_to_start(){
 						break;
 					case POWER_KEY:
 						remote_off = true;
-						TIMSK2 = 0;
+						//TIMSK2 = 0;
 						random_setup();
 						return;
 						break;
@@ -534,7 +534,7 @@ void ready_to_start(){
 			while(digitalRead(BUTTON_PIN) == 0) ;
 			digitalWrite(13, HIGH);
 			delay(4700);   // 4600 is the proper delay. Set to 4700 for something more conservative
-			remote_off = false;		//  make sure to ignore IR pulses that could disable bot in competition
+			remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
 			TIMSK2 = 0;  			//  should disable ir stuff.
 			random_setup();
 			return;
@@ -772,6 +772,17 @@ void test_line_sensors() {
 	}
 }
 
+void test_circle() {
+	while (true) {
+		ESCL_percent(70);
+		ESCR_percent(-10);
+		check_remote_off();    //checks for stop command from remote
+		delay(1);
+		//stop_program();
+	}
+	
+}
+
 //************** SETUP ***********************
 
 void setup(){
@@ -795,6 +806,7 @@ void setup(){
 	Wire.begin();
 	Serial.begin(115200);
 	setup_mpu6050();
+	//watch_gyro();
 	//test_line_sensors();
 	//test_button();
 	//while(digitalRead(9));
@@ -824,6 +836,7 @@ void setup(){
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
 	ignore_line = true;
+	test_circle();
 }
 
 /********
