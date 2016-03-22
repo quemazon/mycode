@@ -1,15 +1,29 @@
 #include <Wire.h>
 #include <I2Cdev.h>
 #include <MPU6050.h>
+#include <PID_v1.h>
+#include <Servo.h>
 
 //#define GYRO_CAL 235434200	//this has to be measured by rotating the gyro 180 deg. and reading the output
 #define GYRO_CAL 58408577	// for 1000 deg/sec this has to be measured by rotating the gyro 180 deg. and reading the output
+#define R_ESC_PIN 3
+#define L_ESC_PIN 2
 
 //Initialize variables
 boolean gyro_flag = false, cal_flag = false, long_flag = false;
 long gyro_count = 0, gyro_null=0, accum=0, time=0, timeout = 0;
 int angle_diff, angle_last, angle_target, angle_camera, angle=0;
+int turn_rate=0;
 byte result, state;
+
+
+double Setpoint, Input, Output;
+
+PID myPID(&Input, &Output, &Setpoint,0.03,0,0, DIRECT);
+
+Servo escR;
+Servo escL;
+
 
 //Initialize objects
 MPU6050 accelgyro;
@@ -79,8 +93,8 @@ void read_FIFO(){
 		if((accum < -GYRO_CAL) && (!cal_flag)) accum += GYRO_CAL*2;
 	}
 	//angle = (float)accum/(float)GYRO_CAL * -3.14159;   //change sign of PI for flipped gyro
-	//angle = (float)accum/(float)GYRO_CAL * -180;   //using degrees *10, negative for flipped gyro.
-	angle = temp;
+	angle = (float)accum/(float)GYRO_CAL * -180;   //using degrees *10, negative for flipped gyro.
+	if (temp != 0) turn_rate = temp;
 
 	return ;
 }
@@ -145,8 +159,8 @@ void setup_mpu6050(){
 	Serial.println(F("Enabling FIFO..."));
 	accelgyro.setFIFOEnabled(true);
 	accelgyro.setZGyroFIFOEnabled(true);
-	accelgyro.setXGyroFIFOEnabled(true);
-	accelgyro.setYGyroFIFOEnabled(true);
+	accelgyro.setXGyroFIFOEnabled(false);
+	accelgyro.setYGyroFIFOEnabled(false);
 	accelgyro.setAccelFIFOEnabled(false);
 	Serial.print("Z axis enabled?\t"); Serial.println(accelgyro.getZGyroFIFOEnabled());
 	Serial.print("x axis enabled?\t"); Serial.println(accelgyro.getXGyroFIFOEnabled());
@@ -167,14 +181,27 @@ void setup(){
 	//delay(3200);
 	accelgyro.resetFIFO();
 	timeout = millis();
+	Setpoint = -6800;
+	myPID.SetMode(AUTOMATIC);
+	myPID.SetSampleTime(20);
+	myPID.SetOutputLimits(-500, 500);
+	escR.attach(R_ESC_PIN);
+	escL.attach(L_ESC_PIN);
+	escL.writeMicroseconds(1550);
+	escR.writeMicroseconds(2000);
+	while (angle > -50) read_FIFO();
+	escL.writeMicroseconds(1850);
+	escR.writeMicroseconds(1450);
+	delay(500);
 }
 
 void loop(){
 	//watch_angle();
-	if ((millis() - timeout) > 0){
-		digitalWrite(10, HIGH);
-		read_FIFO();
-		digitalWrite(10, LOW);
-		timeout = millis();
+	read_FIFO();
+	Input = (double)turn_rate;
+	if (myPID.Compute()) {
+		escR.writeMicroseconds(Output+1500);
+		Serial.println(Input);  //watching in radians
+
 	}
 }

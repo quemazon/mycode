@@ -7,6 +7,8 @@
 #include <I2Cdev.h>
 #include <MPU6050.h>
 #include <QTRSensors.h>
+#include <PID_v1.h>
+
 
 
 //#define GYRO_CAL 235434200	//this has to be measured by rotating the gyro 180 deg. and reading the output
@@ -59,7 +61,8 @@
 #define SEARCH_NORMAL 1
 #define SEARCH_GYRO 2
 #define GOTO_ANGLE 3
-#define BACKUP 4 
+#define BACKUP 4
+#define SEARCH_TURN_RATE 5 
 
 //IR key definitions
 #define SELECT_BOT_1 0xE2
@@ -86,7 +89,7 @@
 #define NUM_SENSORS   2     // number of sensors used
 #define TIMEOUT     250  //  QTRC timeout valuse for line sensors
 #define TO_NORMAL	15
-#define TO_GYRO		15	// default 15 
+#define TO_GYRO		30	// default 15 
 //#define TO_GYRO		5
 #define TO_BACKUP	100
 #define EMITTER_PIN   0     // emitter is controlled by digital pin 2
@@ -106,9 +109,15 @@ byte line_sensors;
 boolean gyro_flag = false, cal_flag = false, long_flag = false, not_blind = true;
 long gyro_count = 0, gyro_null=0, accum=0, time=0, angle_target = 0;
 int angle_diff, angle_last, angle_camera, angle=0, state_counter = 0;
-int search_timeout=1000, angle_timeout;
+int search_timeout=1000, angle_timeout, turn_rate;
 double angle_err, angle_errSum; 
 byte result;
+
+//PID stuff
+/* double Setpoint, Input, Output;
+double Kp=2, Ki=5, Kd=1;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+ */
 
 //Initialize objects
 Servo escR;
@@ -153,6 +162,7 @@ byte read_sensors(){
 		if (flags == FL_BIT) last_turn = LEFT_TURN;
 		else if (flags == FR_BIT) last_turn = RIGHT_TURN;		
 	}
+	//flags = 0;
 	return flags;
 }
 
@@ -171,6 +181,7 @@ void search_normal() {
 		turn_to_last();
 		return;
 	}
+	
 	switch (front_sensors) {  	// MOVE BASED ON SENSORS
 		case FR_BIT:  // right sensor
 			//reset counter
@@ -189,41 +200,16 @@ void search_normal() {
 	}
 }
 
-// void search_normal() {
-	// if (front_sensors) search_timeout =0;
-	// search_timeout ++;
-	// if (search_timeout > TO_NORMAL) {
-		// turn_to_last;
-		// return;
-	// }
-	// switch (front_sensors) {  	// MOVE BASED ON SENSORS
-		// case FR_BIT:  // right sensor
-			// ESCL_percent(99);
-			// ESCR_percent(85);
-			// break;
-		// case FL_BIT:  //left sensor
-			// ESCR_percent(99);
-			// ESCL_percent(85);
-			// break;
-		// case FR_BIT+FL_BIT:  //both sensors
-			// ESCL_percent(99);
-			// ESCR_percent(99);
-			// break;
-		// default: ;	// nothing seen, do nothing
-	// }
-// }
-
 void search_gyro() {
 	if (front_sensors) {
-		if (front_sensors == FL_BIT) accum = 0;    // use 0 sometimes 5000000
-		else if (front_sensors == FR_BIT) accum = 0;  // use 0 sometimes
+		if (front_sensors == FL_BIT) accum = 15000000;    // use 0 sometimes 5000000
+		else if (front_sensors == FR_BIT) accum = -15000000;  // use 0 sometimes
 		else accum = 0;
 		search_timeout =0;
 	}
 	search_timeout ++;
 	if (search_timeout > TO_GYRO) turn_to_last();
 	else goto_zero();
-
 }
 
 void goto_angle() {
@@ -242,6 +228,7 @@ void goto_angle() {
 	if (search_timeout > angle_timeout) {
 		mode = attack_mode;
 		search_timeout = 1000;   //set timeout high, so that it goes to last_turn search
+		return;
 		//turn_to_last();
 		//while(true);
 		//stop_program();
@@ -303,7 +290,7 @@ void line_detected() {
 void check_remote_off() {
 	if (digitalRead(IR_PIN) < 1) ir_counter++;
 	else ir_counter = 0;
-	if (ir_counter > 5) {
+	if (ir_counter > 8) {
 		stop_program();
 	}
 }
@@ -403,7 +390,7 @@ void IR_menu(){
 						Serial.println("SEARCH GYRO");
 						break;
 					case PLAY_KEY:
-						TIMSK2 = 0;  //should disable ir stuff.
+						//TIMSK2 = 0;  //should disable ir stuff.
 						return;
 						break;
 					// case POWER_KEY:
@@ -432,7 +419,7 @@ void IR_set_angle(){
 	angle_target = angle_temp;
 	Serial.println(angle_target);
 	accum = (long)angle_target;
-	search_timeout = 300;
+	//search_timeout = 120;
 	//state_counter = 180;
 	return;
 }
@@ -498,7 +485,7 @@ void ready_to_start(){
 	// angle_timeout = 160;
 	// ignore_line = true;
 
-//	attack_mode = SEARCH_NORMAL;		//attack mode determine the default mode after the opening move
+	attack_mode = SEARCH_NORMAL;		//attack mode determine the default mode after the opening move
 	mode = GOTO_ANGLE;		// this is the opening mode. should be goto_angle
 	not_blind = false;		// whether to detect oponent during opening move. 
 	last_turn = RIGHT_TURN; // the defalt turn direction
@@ -520,8 +507,8 @@ void ready_to_start(){
 						break;
 					case POWER_KEY:
 						remote_off = true;
-						//TIMSK2 = 0;
-						random_setup();
+						TIMSK2 = 0;
+						//random_setup();
 						return;
 						break;
 				}
@@ -533,10 +520,10 @@ void ready_to_start(){
 			delay(500);
 			while(digitalRead(BUTTON_PIN) == 0) ;
 			digitalWrite(13, HIGH);
-			delay(4700);   // 4600 is the proper delay. Set to 4700 for something more conservative
+			delay(4600);   // 4600 is the proper delay. Set to 4700 for something more conservative
 			remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
 			TIMSK2 = 0;  			//  should disable ir stuff.
-			random_setup();
+			//random_setup();
 			return;
 		}
 	delay(100);
@@ -679,7 +666,7 @@ void read_FIFO(){
 	//angle = (float)accum/(float)GYRO_CAL * -3.14159;   //change sign of PI for flipped gyro
 	//accum = 0 - accum;
 	angle = (float)accum/(float)GYRO_CAL * -180;   //using degrees *10, negative for flipped gyro.
-
+	turn_rate = temp;
 	return ;
 }
 
@@ -829,14 +816,14 @@ void setup(){
 	//timeout = 1000;
 	//delay(4000);
 	//Serial.println("start!!");
-	//attack_mode = SEARCH_NORMAL;
-	not_blind = true;
-	//mode = GOTO_ANGLE;
+	attack_mode = SEARCH_NORMAL;
+	not_blind = false;
+	//mode = SEARCH_GYRO;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
 	ignore_line = true;
-	test_circle();
+	//test_circle();
 }
 
 /********
@@ -871,11 +858,11 @@ void loop(){
 	//digitalWrite(10, HIGH);
 	front_sensors = read_sensors();
 	if (remote_off) check_remote_off();
-	line_sensors = read_line_sensors();
+	//line_sensors = read_line_sensors();
     //digitalWrite(10, LOW);
 	//Serial.println(line_sensors);
-	if (line_sensors) line_detected();
-	//mode = SEARCH_NORMAL;
+	//if (line_sensors) line_detected();
+	//mode = SEARCH_GYRO;
 	switch (mode) {
 		case SEARCH_NORMAL:
 			//Serial.println("search normal");
