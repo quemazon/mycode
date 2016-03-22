@@ -62,7 +62,10 @@
 #define SEARCH_GYRO 2
 #define GOTO_ANGLE 3
 #define BACKUP 4
-#define SEARCH_TURN_RATE 5 
+#define SEARCH_TURN_RATE 5
+#define SEARCH_LONG 6
+#define ARREST_RIGHT 7
+#define ARREST_LEFT 8 
 
 //IR key definitions
 #define SELECT_BOT_1 0xE2
@@ -89,7 +92,7 @@
 #define NUM_SENSORS   2     // number of sensors used
 #define TIMEOUT     250  //  QTRC timeout valuse for line sensors
 #define TO_NORMAL	15
-#define TO_GYRO		30	// default 15 
+#define TO_GYRO		150	// default 15 
 //#define TO_GYRO		5
 #define TO_BACKUP	100
 #define EMITTER_PIN   0     // emitter is controlled by digital pin 2
@@ -175,7 +178,13 @@ byte read_line_sensors() {
 }
 
 void search_normal() {
-	if (front_sensors > 0) search_timeout =0;
+	if (front_sensors > 0) {
+		// if (turn_rate > 12000) last_turn = RIGHT_TURN;
+		// else if (turn_rate < -12000) last_turn = LEFT_TURN;
+		//if (turn_rate > 15000) stop_program();
+		//else if (turn_rate < -15000) stop_program();
+		search_timeout =0;
+	}
 	search_timeout ++;
 	if (search_timeout > TO_NORMAL) {
 		turn_to_last();
@@ -202,14 +211,49 @@ void search_normal() {
 
 void search_gyro() {
 	if (front_sensors) {
-		if (front_sensors == FL_BIT) accum = 15000000;    // use 0 sometimes 5000000
-		else if (front_sensors == FR_BIT) accum = -15000000;  // use 0 sometimes
+		if (turn_rate > 12000) 5000000;
+		else if (turn_rate < -12000) accum = -5000000;
+		else if (front_sensors == FL_BIT) accum = 0;    // use 0 sometimes 5000000
+		else if (front_sensors == FR_BIT) accum = 0;  // use 0 sometimes
 		else accum = 0;
 		search_timeout =0;
 	}
 	search_timeout ++;
+	//if (abs(angle)>650
 	if (search_timeout > TO_GYRO) turn_to_last();
 	else goto_zero();
+}
+
+void search_long() {
+	turn_to_last();
+	if (front_sensors) {
+		if (turn_rate > 2000) mode = ARREST_RIGHT;
+		else if (turn_rate < -2000) mode = ARREST_LEFT;
+	}
+}
+
+void arrest_right() {
+	if (turn_rate > 2000) {
+		ESCL_percent(99);
+		ESCR_percent(-1);
+		}		
+	else {
+		last_turn = RIGHT_TURN;
+		mode = attack_mode;
+		search_timeout = 1000;
+	}
+}
+
+void arrest_left() {
+	if (turn_rate < -2000) {
+		ESCL_percent(-1);
+		ESCR_percent(99);
+		}		
+	else {
+		last_turn = LEFT_TURN;
+		mode = attack_mode;
+		search_timeout = 1000;
+	}
 }
 
 void goto_angle() {
@@ -488,7 +532,7 @@ void ready_to_start(){
 	attack_mode = SEARCH_NORMAL;		//attack mode determine the default mode after the opening move
 	mode = GOTO_ANGLE;		// this is the opening mode. should be goto_angle
 	not_blind = false;		// whether to detect oponent during opening move. 
-	last_turn = RIGHT_TURN; // the defalt turn direction
+	last_turn = LEFT_TURN; // the defalt turn direction
 
 	
 	while (true) {
@@ -816,9 +860,9 @@ void setup(){
 	//timeout = 1000;
 	//delay(4000);
 	//Serial.println("start!!");
-	attack_mode = SEARCH_NORMAL;
+	attack_mode = SEARCH_GYRO;
 	not_blind = false;
-	//mode = SEARCH_GYRO;
+	mode = SEARCH_LONG;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
@@ -879,6 +923,18 @@ void loop(){
 
 		case BACKUP:
 			backup();
+		break;
+		
+		case SEARCH_LONG:
+			search_long();
+		break;
+
+		case ARREST_RIGHT:
+			arrest_right();
+		break;
+
+		case ARREST_LEFT:
+			arrest_left();
 		break;
 	}
 	// if ((millis() - time) > 0) {
