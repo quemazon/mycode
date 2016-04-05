@@ -79,8 +79,7 @@ void read_FIFO(){
 		if((accum < -GYRO_CAL) && (!cal_flag)) accum += GYRO_CAL*2;
 	}
 	//angle = (float)accum/(float)GYRO_CAL * -3.14159;   //change sign of PI for flipped gyro
-	//angle = (float)accum/(float)GYRO_CAL * -180;   //using degrees *10, negative for flipped gyro.
-	angle = temp;
+	angle = (float)accum/(float)GYRO_CAL * -180;   //using degrees *10, negative for flipped gyro.
 
 	return ;
 }
@@ -145,8 +144,8 @@ void setup_mpu6050(){
 	Serial.println(F("Enabling FIFO..."));
 	accelgyro.setFIFOEnabled(true);
 	accelgyro.setZGyroFIFOEnabled(true);
-	accelgyro.setXGyroFIFOEnabled(true);
-	accelgyro.setYGyroFIFOEnabled(true);
+	accelgyro.setXGyroFIFOEnabled(false);
+	accelgyro.setYGyroFIFOEnabled(false);
 	accelgyro.setAccelFIFOEnabled(false);
 	Serial.print("Z axis enabled?\t"); Serial.println(accelgyro.getZGyroFIFOEnabled());
 	Serial.print("x axis enabled?\t"); Serial.println(accelgyro.getXGyroFIFOEnabled());
@@ -170,7 +169,7 @@ void setup(){
 }
 
 void loop(){
-	//watch_angle();
+	watch_angle();
 	if ((millis() - timeout) > 0){
 		digitalWrite(10, HIGH);
 		read_FIFO();

@@ -181,18 +181,18 @@ void setup(){
 	//delay(3200);
 	accelgyro.resetFIFO();
 	timeout = millis();
-	Setpoint = -6800;
+	Setpoint = -3000;
 	myPID.SetMode(AUTOMATIC);
 	myPID.SetSampleTime(20);
 	myPID.SetOutputLimits(-500, 500);
 	escR.attach(R_ESC_PIN);
 	escL.attach(L_ESC_PIN);
-	escL.writeMicroseconds(1550);
-	escR.writeMicroseconds(2000);
-	while (angle > -50) read_FIFO();
-	escL.writeMicroseconds(1850);
-	escR.writeMicroseconds(1450);
-	delay(500);
+//	escL.writeMicroseconds(1550);
+//	escR.writeMicroseconds(2000);
+//	while (angle > -50) read_FIFO();
+	escL.writeMicroseconds(1900);
+	escR.writeMicroseconds(1800);
+	delay(150);
 }
 
 void loop(){
