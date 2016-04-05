@@ -65,7 +65,8 @@
 #define SEARCH_TURN_RATE 5
 #define SEARCH_LONG 6
 #define ARREST_RIGHT 7
-#define ARREST_LEFT 8 
+#define ARREST_LEFT 8
+#define SEARCH_NEW 9
 
 //IR key definitions
 #define SELECT_BOT_1 0xE2
@@ -91,8 +92,8 @@
 
 #define NUM_SENSORS   2     // number of sensors used
 #define TIMEOUT     250  //  QTRC timeout valuse for line sensors
-#define TO_NORMAL	15
-#define TO_GYRO		150	// default 15 
+#define TO_NORMAL	5
+#define TO_GYRO		5	// default 15 
 //#define TO_GYRO		5
 #define TO_BACKUP	100
 #define EMITTER_PIN   0     // emitter is controlled by digital pin 2
@@ -161,11 +162,11 @@ byte read_sensors(){
 	byte flags = 0;
 	if (digitalRead(FL_PIN)) flags += FL_BIT;
 	if (digitalRead(FR_PIN)) flags += FR_BIT;
-	if (flags > 0) {
+/* 	if (flags > 0) {
 		if (flags == FL_BIT) last_turn = LEFT_TURN;
 		else if (flags == FR_BIT) last_turn = RIGHT_TURN;		
 	}
-	//flags = 0;
+ */	//flags = 0;
 	return flags;
 }
 
@@ -222,6 +223,39 @@ void search_gyro() {
 	//if (abs(angle)>650
 	if (search_timeout > TO_GYRO) turn_to_last();
 	else goto_zero();
+}
+
+void search_new(){
+	if (front_sensors == 0){
+		turn_to_last();
+		return;
+	}
+	//stop_program();
+	if (turn_rate > 20000) {
+		last_turn = RIGHT_TURN;
+		turn_to_last();
+		return;
+	}
+	if (turn_rate < -20000) {
+		last_turn = LEFT_TURN;
+		turn_to_last();
+		return;
+	}
+	switch (front_sensors) {  	// MOVE BASED ON SENSORS
+		case FR_BIT:  // right sensor
+			//reset counter
+			ESCL_percent(80);
+			ESCR_percent(60);
+			break;
+		case FL_BIT:  //left sensor
+			ESCR_percent(80);
+			ESCL_percent(60);
+			break;
+		case FR_BIT+FL_BIT:  //both sensors
+			ESCL_percent(99);
+			ESCR_percent(99);
+			break;
+	}
 }
 
 void search_long() {
@@ -860,9 +894,9 @@ void setup(){
 	//timeout = 1000;
 	//delay(4000);
 	//Serial.println("start!!");
-	attack_mode = SEARCH_GYRO;
+	//attack_mode = SEARCH_GYRO;
 	not_blind = false;
-	mode = SEARCH_LONG;
+	//mode = SEARCH_GYRO;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
@@ -906,7 +940,7 @@ void loop(){
     //digitalWrite(10, LOW);
 	//Serial.println(line_sensors);
 	//if (line_sensors) line_detected();
-	//mode = SEARCH_GYRO;
+	mode = SEARCH_NEW;
 	switch (mode) {
 		case SEARCH_NORMAL:
 			//Serial.println("search normal");
@@ -917,6 +951,10 @@ void loop(){
 			search_gyro();
 		break;
 
+		case SEARCH_NEW:
+			search_new();
+		break;
+		
 		case GOTO_ANGLE:
 			goto_angle();
 		break;
