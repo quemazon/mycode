@@ -67,6 +67,7 @@
 #define ARREST_RIGHT 7
 #define ARREST_LEFT 8
 #define SEARCH_NEW 9
+#define ARREST_TURN 10
 
 //IR key definitions
 #define SELECT_BOT_1 0xE2
@@ -261,6 +262,8 @@ void search_new(){
 void search_long() {
 	turn_to_last();
 	if (front_sensors) {
+		mode = ARREST_TURN;
+		return;
 		if (turn_rate > 2000) mode = ARREST_RIGHT;
 		else if (turn_rate < -2000) mode = ARREST_LEFT;
 	}
@@ -272,6 +275,7 @@ void arrest_right() {
 		ESCR_percent(-1);
 		}		
 	else {
+		stop_program();
 		last_turn = RIGHT_TURN;
 		mode = attack_mode;
 		search_timeout = 1000;
@@ -284,9 +288,25 @@ void arrest_left() {
 		ESCR_percent(99);
 		}		
 	else {
+		stop_program();
 		last_turn = LEFT_TURN;
 		mode = attack_mode;
 		search_timeout = 1000;
+	}
+}
+
+void arrest_turn(){
+	if (turn_rate < -1000) {
+		ESCL_percent(-99);
+		ESCR_percent(99);
+	}		
+	else if (turn_rate > 1000) {
+		ESCL_percent(99);
+		ESCR_percent(-99);
+	}
+	else {
+		ESCL_percent(0);
+		ESCR_percent(0);
 	}
 }
 
@@ -349,12 +369,12 @@ void backup() {
 
 void turn_to_last() {
 	if (last_turn == RIGHT_TURN) {
-		ESCL_percent(99);
-		ESCR_percent(-1);
+		ESCL_percent(80);
+		ESCR_percent(-80);
 	}
 	else {
-		ESCR_percent(99);
-		ESCL_percent(-1);
+		ESCR_percent(80);
+		ESCL_percent(-80);
 	}
 
 }
@@ -896,7 +916,7 @@ void setup(){
 	//Serial.println("start!!");
 	//attack_mode = SEARCH_GYRO;
 	not_blind = false;
-	//mode = SEARCH_GYRO;
+	mode = SEARCH_LONG;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
@@ -940,7 +960,7 @@ void loop(){
     //digitalWrite(10, LOW);
 	//Serial.println(line_sensors);
 	//if (line_sensors) line_detected();
-	mode = SEARCH_NEW;
+	//mode = SEARCH_NEW;
 	switch (mode) {
 		case SEARCH_NORMAL:
 			//Serial.println("search normal");
@@ -973,6 +993,10 @@ void loop(){
 
 		case ARREST_LEFT:
 			arrest_left();
+		break;
+		
+		case ARREST_TURN:
+			arrest_turn();
 		break;
 	}
 	// if ((millis() - time) > 0) {
