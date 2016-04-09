@@ -111,7 +111,7 @@ byte state, state_cur, state_pre, mode, front_sensors, attack_mode;
 byte line_sensors;
 
 //gyro variables
-boolean gyro_flag = false, cal_flag = false, long_flag = false, not_blind = true;
+boolean gyro_flag = false, cal_flag = false, long_flag = false, blind = false;
 long gyro_count = 0, gyro_null=0, accum=0, time=0, angle_target = 0;
 int angle_diff, angle_last, angle_camera, angle=0, state_counter = 0;
 int search_timeout=1000, angle_timeout, turn_rate;
@@ -324,7 +324,7 @@ void arrest_turn(){
 }
 
 void goto_angle() {
-	if (not_blind) {
+	if (!(blind)) {
 		if (front_sensors) {
 			if (attack_mode = SEARCH_NORMAL) search_timeout = 1000;
 			else {
@@ -493,7 +493,7 @@ void IR_menu(){
 						Serial.println("LEFT TURN");
 						break;
 					case KARAOKE:
-						not_blind = true;
+						blind = true;
 						Serial.println("ignore sensors in opening");
 						break;
 					case FUNCTION_KEY:
@@ -596,9 +596,9 @@ void ready_to_start(){
 	// angle_timeout = 160;
 	// ignore_line = true;
 
-	attack_mode = SEARCH_NORMAL;		//attack mode determine the default mode after the opening move
+	attack_mode = SEARCH_GYRO;		//attack mode determine the default mode after the opening move
 	mode = GOTO_ANGLE;		// this is the opening mode. should be goto_angle
-	not_blind = false;		// whether to detect oponent during opening move. 
+	blind = false;		// whether to detect oponent during opening move. 
 	last_turn = LEFT_TURN; // the defalt turn direction
 
 	
@@ -644,7 +644,7 @@ void ready_to_start(){
 void random_setup() {
 	attack_mode = SEARCH_GYRO;		//attack mode determine the default mode after the opening move
 	//randomSeed(analogRead(0));
-	not_blind = true;		// whether to detect oponent during opening move. 
+	blind = false;		// whether to detect oponent during opening move. 
 	//int temp = random(0,100);
 	//Serial.print("random number is: ");
 	boolean rand;
@@ -672,9 +672,9 @@ void goto_zero(){
 	if (accum > 0) {
 		ESCL_percent(100);
 		float temp;
-		temp = 100.0 - (float)accum/10e4;		// virtual gain. default is 20e4
+		temp = 100.0 - (float)accum/40e4;		// virtual gain. default is 20e4
 		if (temp > 100) temp = 100;
-		if (temp < 70) temp = 70;
+		if (temp < 0) temp = -1;
 		ESCR_percent(temp);
 		//Serial.println(temp);
 		//Serial.println(accum);
@@ -682,9 +682,9 @@ void goto_zero(){
 	else {
 		ESCR_percent(100);
 		float temp;
-		temp = 100.0 + (float)accum/10e4;      // virtual gain. default is 20e4
+		temp = 100.0 + (float)accum/40e4;      // virtual gain. default is 20e4
 		if (temp > 100) temp = 100;
-		if (temp < 70) temp = 70;
+		if (temp < 0) temp = -1;
 		ESCL_percent(temp);		
 		//Serial.println(temp);
 		//Serial.println(accum);
@@ -928,11 +928,11 @@ void setup(){
 	//delay(4000);
 	//Serial.println("start!!");
 	//attack_mode = SEARCH_GYRO;
-	not_blind = false;
-	mode = SEARCH_GYRO;
+	//blind = false;
+	//mode = SEARCH_GYRO;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
-	angle_timeout = 120;  //default 140
+	angle_timeout = 160;  //default 140
 	ignore_line = true;
 	//test_circle();
 }
