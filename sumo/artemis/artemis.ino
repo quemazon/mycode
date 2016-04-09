@@ -500,8 +500,12 @@ void IR_menu(){
 						attack_mode = SEARCH_GYRO;
 						Serial.println("SEARCH GYRO");
 						break;
+					case SELECT_BOT_3:
+						remote_off = false;
+						Serial.println("DISABLE REMOTE OFF");
+						break;
 					case PLAY_KEY:
-						//TIMSK2 = 0;  //should disable ir stuff.
+						if (!(remote_off)) TIMSK2 = 0;  //should disable ir stuff.
 						return;
 						break;
 					// case POWER_KEY:
@@ -600,7 +604,7 @@ void ready_to_start(){
 	mode = GOTO_ANGLE;		// this is the opening mode. should be goto_angle
 	blind = false;		// whether to detect oponent during opening move. 
 	last_turn = LEFT_TURN; // the defalt turn direction
-
+	remote_off = true;
 	
 	while (true) {
 		digitalWrite(13, HIGH);
@@ -632,7 +636,7 @@ void ready_to_start(){
 			while(digitalRead(BUTTON_PIN) == 0) ;
 			digitalWrite(13, HIGH);
 			delay(4600);   // 4600 is the proper delay. Set to 4700 for something more conservative
-			remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
+			//remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
 			TIMSK2 = 0;  			//  should disable ir stuff.
 			//random_setup();
 			return;
