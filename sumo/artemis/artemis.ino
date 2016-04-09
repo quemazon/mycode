@@ -381,6 +381,7 @@ void backup() {
 }
 
 void turn_to_last() {
+	//stop_program();
 	if (last_turn == RIGHT_TURN) {
 		ESCL_percent(50);
 		ESCR_percent(-1);
@@ -635,7 +636,8 @@ void ready_to_start(){
 			delay(500);
 			while(digitalRead(BUTTON_PIN) == 0) ;
 			digitalWrite(13, HIGH);
-			delay(4600);   // 4600 is the proper delay. Set to 4700 for something more conservative
+			//digitalWrite(10, HIGH);
+			delay(4900);   // exact delay is 4900 for now
 			//remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
 			TIMSK2 = 0;  			//  should disable ir stuff.
 			//random_setup();
@@ -978,6 +980,9 @@ void loop(){
 	//Serial.println(line_sensors);
 	//if (line_sensors) line_detected();
 	//mode = SEARCH_NEW;
+	//digitalWrite(13, LOW);
+	//while (true);
+
 	switch (mode) {
 		case SEARCH_NORMAL:
 			//Serial.println("search normal");
