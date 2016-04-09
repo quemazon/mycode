@@ -94,7 +94,7 @@
 #define NUM_SENSORS   2     // number of sensors used
 #define TIMEOUT     250  //  QTRC timeout valuse for line sensors
 #define TO_NORMAL	5
-#define TO_GYRO		5	// default 15 
+#define TO_GYRO		15	// default 15 
 //#define TO_GYRO		5
 #define TO_BACKUP	100
 #define EMITTER_PIN   0     // emitter is controlled by digital pin 2
@@ -163,11 +163,11 @@ byte read_sensors(){
 	byte flags = 0;
 	if (digitalRead(FL_PIN)) flags += FL_BIT;
 	if (digitalRead(FR_PIN)) flags += FR_BIT;
-/* 	if (flags > 0) {
+	if (flags > 0) {
 		if (flags == FL_BIT) last_turn = LEFT_TURN;
 		else if (flags == FR_BIT) last_turn = RIGHT_TURN;		
 	}
- */	//flags = 0;
+	//flags = 0;
 	return flags;
 }
 
@@ -211,7 +211,7 @@ void search_normal() {
 	}
 }
 
-void search_gyro() {
+/* void search_gyro() {
 	if (front_sensors) {
 		if (turn_rate > 12000) 5000000;
 		else if (turn_rate < -12000) accum = -5000000;
@@ -222,6 +222,19 @@ void search_gyro() {
 	}
 	search_timeout ++;
 	//if (abs(angle)>650
+	if (search_timeout > TO_GYRO) turn_to_last();
+	else goto_zero();
+}
+ */
+
+ void search_gyro() {
+	if (front_sensors) {
+		if (front_sensors == FL_BIT) accum = 0;    // use 0 sometimes 5000000
+		else if (front_sensors == FR_BIT) accum = -0;  // use 0 sometimes
+		else accum = 0;
+		search_timeout =0;
+	}
+	search_timeout ++;
 	if (search_timeout > TO_GYRO) turn_to_last();
 	else goto_zero();
 }
@@ -369,12 +382,12 @@ void backup() {
 
 void turn_to_last() {
 	if (last_turn == RIGHT_TURN) {
-		ESCL_percent(80);
-		ESCR_percent(-80);
+		ESCL_percent(50);
+		ESCR_percent(-1);
 	}
 	else {
-		ESCR_percent(80);
-		ESCL_percent(-80);
+		ESCR_percent(50);
+		ESCL_percent(-1);
 	}
 
 }
@@ -659,9 +672,9 @@ void goto_zero(){
 	if (accum > 0) {
 		ESCL_percent(100);
 		float temp;
-		temp = 100.0 - (float)accum/40e4;		// virtual gain. default is 20e4
+		temp = 100.0 - (float)accum/10e4;		// virtual gain. default is 20e4
 		if (temp > 100) temp = 100;
-		if (temp < 0) temp = 0;
+		if (temp < 70) temp = 70;
 		ESCR_percent(temp);
 		//Serial.println(temp);
 		//Serial.println(accum);
@@ -669,9 +682,9 @@ void goto_zero(){
 	else {
 		ESCR_percent(100);
 		float temp;
-		temp = 100.0 + (float)accum/40e4;      // virtual gain. default is 20e4
+		temp = 100.0 + (float)accum/10e4;      // virtual gain. default is 20e4
 		if (temp > 100) temp = 100;
-		if (temp < 0) temp = 0;
+		if (temp < 70) temp = 70;
 		ESCL_percent(temp);		
 		//Serial.println(temp);
 		//Serial.println(accum);
@@ -916,7 +929,7 @@ void setup(){
 	//Serial.println("start!!");
 	//attack_mode = SEARCH_GYRO;
 	not_blind = false;
-	mode = SEARCH_LONG;
+	mode = SEARCH_GYRO;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
 	angle_timeout = 120;  //default 140
