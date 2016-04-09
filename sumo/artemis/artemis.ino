@@ -932,7 +932,7 @@ void setup(){
 	//mode = SEARCH_GYRO;
 	//last_turn = RIGHT_TURN;
 	search_timeout = 0;
-	angle_timeout = 160;  //default 140
+	angle_timeout = 180;  //default 140
 	ignore_line = true;
 	//test_circle();
 }
