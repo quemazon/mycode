@@ -637,10 +637,12 @@ void ready_to_start(){
 			while(digitalRead(BUTTON_PIN) == 0) ;
 			digitalWrite(13, HIGH);
 			//digitalWrite(10, HIGH);
-			delay(4900);   // exact delay is 4900 for now
+			delay(4800);   // exact delay is 4900 for now
 			//remote_off = true;		//  make sure to ignore IR pulses that could disable bot in competition
 			TIMSK2 = 0;  			//  should disable ir stuff.
-			//random_setup();
+			calculate_null();
+			accelgyro.resetFIFO();
+			random_setup();
 			return;
 		}
 	delay(100);
@@ -650,7 +652,7 @@ void ready_to_start(){
 void random_setup() {
 	attack_mode = SEARCH_GYRO;		//attack mode determine the default mode after the opening move
 	//randomSeed(analogRead(0));
-	blind = false;		// whether to detect oponent during opening move. 
+	blind = true;		// whether to detect oponent during opening move. 
 	//int temp = random(0,100);
 	//Serial.print("random number is: ");
 	boolean rand;
