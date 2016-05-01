@@ -1,0 +1,61 @@
+stuff to install:
+
+pip
+sudo apt-get install oracle-java8-jdk
+
+
+reading exif with PIL
+>>> from PIL import Image
+>>> from PIL.ExifTags import TAGS
+>>> i = Image.open('image.JPG')
+>>> wow = i._getexif()
+>>> wow[36867] (or 36868)
+
+>>> import time
+>>> datetimeobject = time.strptime(temp,'%Y:%m:%d %H:%M:%S')
+
+>>> from time import strftime
+>>> strftime("%Y%m%d%H%M%S", datetimeobject)
+
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+	
+	
+Bluetooth is a mess. bluez is insatlled out of the box. bluetoothctl is also installed, but it has to be run
+from /usr/bin/.
+
+It appears that you can use /usr/bin/bluetoothctl to do the initial pairing. It should remain paired after that (but not connected)
+
+There is no rfcomm.conf file and it doesn't appear to be neceassary. 
+The current path for getting bluetoot working is to first pair the device with bluetoothctl. this only has to be done once.
+
+The major problem appears to be that something called sdptool appears to be broken in the latest version of bluez. Follow the instructions
+on https://bbs.archlinux.org/viewtopic.php?id=201672 to fix it. Specifically:
+Edit the following file:
+/etc/systemd/system/dbus-org.bluez.service
+and make the following change:
+ExecStart=/usr/lib/bluetooth/bluetoothd --compat
+
+This SHOULD fix sdptool. You will have to reboot.
+
+Now, entering the following 2 commands will get a login screen when connecting with blueterm
+sudo sdptool add sp
+sudo rfcomm watch /dev/rfcomm0 1 /sbin/agetty rfcomm0 linux 115200    //this will send invoke a login screen
+or just do this: (no need for sdptool)
+sudo rfcomm watch /dev/rfcomm0   //this continues to watch for a bt connection, then binds it to /dev/rfcomm. Then you can pipe stuff to it.
+
+need to install pyserial:
+sudo apt-get install python-serial 
+
+Now in python use:
+import serial
+ser = serial.Serial(
+    port='/dev/rfcomm0'
+)
+
+ser.write('whatever')
+ser.readline()
+
+

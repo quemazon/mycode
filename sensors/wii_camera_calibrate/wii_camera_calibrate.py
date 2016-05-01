@@ -5,7 +5,7 @@ from pygame.locals import *
 from sys import exit
 from random import *
 
-ser = serial.Serial(18, 115200, timeout=1000)
+ser = serial.Serial(4, 115200, timeout=1000)
 pygame.init()
 SCREEN_DEFAULT_SIZE = (1024, 800)
 SCREEN_DEFAULT_COLOR = (0, 0 ,0)
