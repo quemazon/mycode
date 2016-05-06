@@ -1,0 +1,136 @@
+Installation:
+use win32 disk image to burn Jessi lite to a 32gb sd card.
+insert card in pi ver 3 and connect to ethernet and power (Anker high current supply)
+watch for ip address, then connect with putty. login in with pi/rapberry
+use "sudo raspi-config" to set basic settings.
+
+Install wifi for nikon
+(https://thepihut.com/blogs/raspberry-pi-tutorials/83502916-how-to-setup-wifi-on-raspbian-jessie-lite)
+sudo vi /etc/wpa_supplicant/wpa_supplicant.conf
+
+Use the following:
+
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+        ssid="BURNIKON"
+        psk="guacamaya"
+}
+
+Install Airnef
+
+Go to airnef website: http://www.testcams.com/airnef/
+Download python source: http://www.testcams.com/airnef/Version_1.1/airnef_v1.1_Source.zip
+After download, copy to home directory with winscp
+unzip
+go to airnef dir:
+python airnefcmd.py --slot second --realtimedownload afternormal 
+it should be connect to camera wifi (be sure to enable) and download automatically from slot 2
+
+Install PhotoFloat web gallery application
+website: https://git.zx2c4.com/PhotoFloat/about/
+directions are good:
+
+first update the packages:
+sudo apt-get update
+then, install git:
+sudo apt-get install git
+
+Now get photofloat:
+git clone git://git.zx2c4.com/PhotoFloat
+go to photofload directory and delete google analytics:
+rm web/js/999-googletracker.js
+Have to install java:
+sudo apt-get install oracle-java8-jdk
+now, make:
+make
+mkdir albums
+mkdir cache
+to scan photos:
+cd ../scanner
+./main.py ../web/albums ../web/cache
+
+Pair bluetooth:
+sudo /usr/bin/bluetoothctl
+turn on phone bluetooth discovery
+scan for devices:
+scan on  #should see phone listed
+pair 48:59:29:82:7D:11  # use device address
+
+now, Edit the following file:
+/etc/systemd/system/dbus-org.bluez.service
+and make the following change:
+ExecStart=/usr/lib/bluetooth/bluetoothd --compat
+
+use use the following 2 commands:
+sudo sdptool add sp   # should respond that serial service has been started
+sudo rfcomm watch /dev/rfcomm0
+
+install python serial:
+sudo apt-get install python-serial
+
+install PIL with jpeg support:
+sudo apt-get install python-imaging
+
+
+Getting WIFI AP working:
+
+install dnsmasq
+sudo apt-get install dnsmasq
+
+install lighttpd:
+sudo apt-get install lighttpd   #instructions at http://www.penguintutor.com/linux/light-webserver
+edit home page location: /etc/lighttpd/lighttpd.conf:
+server.document-root        = "/home/pi/PhotoFloat/web"
+
+install rfkill:  *** don't see any need for this
+sudo apt-get install rfkill  #not sure if this is needed. Installing anyway. it's small
+
+install hostapd, needed to act as the acess point
+sudo apt-get install hostapd
+
+install hostap-utils   **** don't see any need for this
+sudo apt-get install hostap-utils
+
+Rpi3 comes with built in wifi on wlan0. The next adapter should be wlan1
+edit /etc/dnsmasq.conf and change the following:
+interface=wlan0
+dhcp-range=192.168.2.1,192.168.2.254,12h
+
+make static IP:
+edit /etc/network/interfaces
+for wlan1, change to:
+allow-hotplug wlan1
+iface wlan1 inet static
+  address 192.168.42.1
+  netmask 255.255.255.0
+  
+make hostapd.conf file: /etc/hostapd/hostapd.conf
+Contains:
+interface=wlan1
+ssid=BPHOTO
+hw_mode=g
+channel=3
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=guacamaya
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+
+now, add the conf file to the configuration:
+edit /etc/default/hostapd
+replace #DAEMON_CONF="" with
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+reboot
+
+
+
+
+
+

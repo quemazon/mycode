@@ -9,6 +9,7 @@ import os
 from PIL import Image, ImageEnhance
 from PIL.ExifTags import TAGS
 import shutil
+import pickle
 #import Image, ImageEnhance
 
 
@@ -53,24 +54,38 @@ def watermark(im, mark, position, opacity=1):
     # composite the watermark with the layer
     return Image.composite(layer, im, layer)
 
+#class session_class:
+#    def __init__(self):
+#        self.dir_org = dir_web + 'originals/'
+#        self.dir_wm = dir_web + 'watermarked/' 
 class session_class:
     def __init__(self):
-        self.dir_org = dir_web + 'originals/'
-        self.dir_wm = dir_web + 'watermarked/' 
+        self.dir_org = id_generator()
+        self.dir_wm = id_generator()
+        self.start_time = time.localtime()
+        self.end_time = 200
+        self.ID = id_generator()
+        self.locked = 'y'
 
-def getsession(timestamp):
-    return session_class()
+def getsession(photo_time):  #this routine should open the session list
+    sessions = pickle.load(open('/home/pi/sessions.db','rb'))
+    for session in reversed(sessions):
+        if photo_time > session.start_time:
+            return session
 
 def check_dir():
     for photo in os.listdir(dir_in):
+        print 'making watermark'
         i = Image.open(dir_in + photo)
-        timestamp = i._getexif()[36867]
-        session = getsession(timestamp)
+        photo_time = time.strptime(i._getexif()[36867],'%Y:%m:%d %H:%M:%S')
+        #gets date time from exif data, turns it into python datetime object
+        session = getsession(photo_time)
         im = Image.open(dir_in + photo)
-        mark = Image.open('watermark.png')
-        watermark(im, mark, 'scale', 1.0).save('watermarked.jpg')
-        shutil.move(dir_in + photo, session.dir_org)
-        shutil.move('watermarked.jpg' , session.dir_wm + photo)
+        mark = Image.open('/home/pi/watermark.png')
+        #watermark(im, mark, 'scale', 1.0).save('watermarked.jpg')
+        watermark(im, mark, 'scale', 1.0).save(dir_web + session.dir_wm + '/' + photo)
+        shutil.move(dir_in + photo, dir_web + session.dir_org)
+        #shutil.move('watermarked.jpg' , dir_web + session.dir_wm + photo)
         #  run code to re-scan                  
 
 def main():

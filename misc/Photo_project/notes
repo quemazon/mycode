@@ -45,6 +45,8 @@ sudo sdptool add sp
 sudo rfcomm watch /dev/rfcomm0 1 /sbin/agetty rfcomm0 linux 115200    //this will send invoke a login screen
 or just do this: (no need for sdptool)
 sudo rfcomm watch /dev/rfcomm0   //this continues to watch for a bt connection, then binds it to /dev/rfcomm. Then you can pipe stuff to it.
+hmm, for the app inventor app, it appears that I also had to do 'sudo sdptool add sp' first. 
+
 
 need to install pyserial:
 sudo apt-get install python-serial 
