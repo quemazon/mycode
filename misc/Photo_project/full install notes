@@ -80,6 +80,9 @@ Getting WIFI AP working:
 install dnsmasq
 sudo apt-get install dnsmasq
 
+in /etc/dnsmasq.conf add the following line:
+address=/#/192.168.42.1   #directs everything to the server
+
 install lighttpd:
 sudo apt-get install lighttpd   #instructions at http://www.penguintutor.com/linux/light-webserver
 edit home page location: /etc/lighttpd/lighttpd.conf:
@@ -116,11 +119,11 @@ channel=3
 macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
-wpa=2
-wpa_passphrase=guacamaya
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP
-rsn_pairwise=CCMP
+#wpa=2
+#wpa_passphrase=guacamaya
+#wpa_key_mgmt=WPA-PSK
+#wpa_pairwise=TKIP
+#rsn_pairwise=CCMP
 
 now, add the conf file to the configuration:
 edit /etc/default/hostapd
@@ -129,8 +132,54 @@ DAEMON_CONF="/etc/hostapd/hostapd.conf"
 
 reboot
 
+added file start.sh 
+added that to the end of /etc/local.rc
+
+installing pip and evdev
+$ sudo apt-get install python-pip python-dev build-essential 
+$ sudo pip install --upgrade pip 
+$ sudo pip install --upgrade virtualenv 
+
+sudo pip install evdev
 
 
+BT printer:
+used sudo /usr/bin/bluetoothctl
+scan on   # wait to find printer
+scan off
+agent on 
+pair <dev mac address>
+use pin = 1234
 
+printf "\x1D\x42\x1\x1B\x21\x30" > /dev/rfcomm0  #print large font on black background
+printf "\x1D\x42\x0\x1B\x21\x30" > /dev/rfcomm0  #print large font on regular white background
 
+I2C enable:
+use sudo raspi-config, menu 82
+add the modules to /etc/modules:
+i2c-bcm2708			#guide metions the bcm2835 modules, but those are for spi use the bcm2708
+i2c-dev
+rtc-ds1307
+Then install a couple other packages. Don't know if they are necessary:
+sudo apt-get update
+sudo apt-get install -y python-smbus i2c-tools
+Follow the steps on this page:
+http://www.raspberrypi-spy.co.uk/2015/05/adding-a-ds3231-real-time-clock-to-the-raspberry-pi/
+basically, edit /etc/rc.local and add these lines:
+echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-1/new_device
+hwclock -s
+There are a few other commands to test suff out
 
+Blacklist
+I had to blacklist the internal wifi then reassign the wlan0 and wlan1 to the other adapters
+/etc/modprobe.d/raspi-blacklist.conf
+
+#wifi
+blacklist brcmfmac
+blacklist brcmutil
+
+for the HW clock I had to disable the fake hw clock by uninstalling that package
+I also had to disable the network time update. The problem is that with dns masq running
+the network cant find servers, so it reports the date incorrectly, and set the hw clock wrong as well.
+just have to depend on the hw clock keeping good time.
+sudo update-rc.d -f ntp remove   # this should stop it from happening. don't know how to reenable yet

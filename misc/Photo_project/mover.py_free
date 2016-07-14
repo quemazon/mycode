@@ -111,8 +111,8 @@ def check_dir():
             mark = Image.open('/home/pi/watermark.png')
             #watermark(im, mark, 'scale', 1.0).save('watermarked.jpg')
             dir_exists(session)
-            watermark(im, mark, 'scale', 1.0).save(dir_web + session['dir_wm'] + '/' + photo)
-            shutil.move(dir_in + photo, dir_web + session['dir_org'])
+            watermark(im, mark, 'scale', 1.0).save(dir_web + 'default/' + photo)
+            os.remove(dir_in + photo)
             update_gallery()
         #shutil.move('watermarked.jpg' , dir_web + session.dir_wm + photo)
         #  run code to re-scan                  

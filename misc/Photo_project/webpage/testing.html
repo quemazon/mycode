@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+I'm here
+<script type="text/javascript" src="sessions.json"></script>
+<p id="demo"></p>
+
+<script>
+var x = document.URL;
+var mydata = JSON.parse(session)
+var temp = "P5S38S"
+var output = "default"
+var arrayLength = mydata.length;
+for (var i = 0; i < arrayLength; i++) {
+    if (mydata[i].ID == "MAG6M7") {
+		output = mydata[i].dir_org;
+	}
+    //Do something
+}
+var addr = "0;URL=http://" + output + "/wow.html#!/" + output + "/";
+
+document.getElementById("demo").innerHTML = addr;
+</script>
+
+</body>
+</html>
