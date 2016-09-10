@@ -153,6 +153,7 @@ def send_status():
     ser.close()
 
 def unlock_session():
+    global sessions
     ser = serial.Serial(
         port='/dev/rfcomm0',
         timeout = 10)
@@ -163,6 +164,9 @@ def unlock_session():
             session['locked'] = 'n'
             ser.write('{:03d}'.format(response))
             ser.close()
+            with open("/home/pi/sessions.db", "wb") as f:
+                pickle.dump(sessions, f)
+            json_out()    
             return
     ser.write('000')
     ser.close()

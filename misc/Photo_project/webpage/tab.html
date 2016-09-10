@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script type="text/javascript" src="sessions.json"></script>
+<META id="redirect_tag" http-equiv="refresh" content="NewUrl">
+<font size="12" color="red">
+Enter Session ID: <input type="text" id="myText" value="" style="font-size:32pt;" size="5">
+
+<p>Enter the session ID from your ticket</p>
+</font>
+<button onclick="myFunction()" style="font-size:32pt;" >Submit</button>
+
+<script>
+function myFunction() {
+	//alert(document.getElementById("myText").value);
+    //document.getElementById("myText").value = "Johnny Bravo";
+	var sidnum = document.getElementById("myText").value;
+	//alert(sidnum);
+	var mydata = JSON.parse(session);
+	var output = "default";
+	var arrayLength = mydata.length;
+	for (var i = 0; i < arrayLength; i++) {
+		if (mydata[i].ID == sidnum) {
+			output = mydata[i].dir_org;
+		}
+	}
+	//alert(output)
+var addr = "0;URL=http://a" + sidnum.toString() + "/gallery.html#!/" + output.toLowerCase();
+//var addr = "0;URL=" + sid + "/gallery.html#!/" + output + "/";
+document.getElementById("redirect_tag").content = addr;
+}
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script type="text/javascript" src="sessions.json"></script>
+<META id="redirect_tag" http-equiv="refresh" content="NewUrl">
+
+<script>
+var x = document.URL;
+var sid = x.split("=")[1];
+sid = sid.split("a")[1]
+var sidnum = Number(sid);
+var mydata = JSON.parse(session)
+var output = "default"
+var arrayLength = mydata.length;
+for (var i = 0; i < arrayLength; i++) {
+    if (mydata[i].ID == sidnum) {
+		output = mydata[i].dir_org;
+		}
+	}
+}
+var addr = "0;URL=http://a" + sidnum.toString() + "/gallery.html#!/" + output.toLowerCase();
+//var addr = "0;URL=" + sid + "/gallery.html#!/" + output + "/";
+document.getElementById("redirect_tag").content = addr;
+</script>
+
+</body>
+</html>
