@@ -120,7 +120,7 @@ void race_startup_routine(){
 	delay(250);
 	esc.attach(THROTTLE);
 	delay(250);
-	esc.writeMicroseconds(S1);
+	esc.writeMicroseconds(SPEED1);
 
 
 	//by turning off the radio, the automatic mode is locked in
@@ -197,7 +197,7 @@ void wp_setup_routine(){
 	delay(250);
 	esc.attach(THROTTLE);
 	delay(250);
-	esc.writeMicroseconds(S1);
+	esc.writeMicroseconds(SPEED1);
 
 	for(int i=0; i<100; i++){	//clears the FIFO buffer and waits 1 sec to start
 		delay(1);
@@ -252,7 +252,7 @@ void setup(){
 
 	esc.attach(THROTTLE);
 	delay(250);
-	esc.writeMicroseconds(S1);
+	esc.writeMicroseconds(SPEED1);
 	
 	bool bypass_menu = false;
 	pinMode(LED_BUILTIN, OUTPUT);
@@ -292,7 +292,7 @@ void loop(){
 		}
 
 		if(!running){	//this will kick start the car/get it moving when it first starts the race
-			esc.writeMicroseconds(S3);
+			esc.writeMicroseconds(SPEED3);
 			running = true;
 		}
 	}
@@ -308,7 +308,7 @@ void loop(){
 	}
 
 	if((wpr_count >= WAYPOINT_COUNT) || (((int)x_wp == 0) && ((int)y_wp == 0))){	//this locks the car into this loop and makes it go slow when we've reached the max waypoints OR the waypoints are 0,0
-		esc.writeMicroseconds(S2);
+		esc.writeMicroseconds(SPEED2);
 		while(true);
 	}
 	

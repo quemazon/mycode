@@ -1,5 +1,5 @@
 //AVC SETTINGS
-#define RR			//use either MM (minuteman) or RR (roadrunner)
+#define MM			//use either MM (minuteman) or RR (roadrunner)
 #define BLUETOOTH 	//use either BLUETOOTH or USB to define the serial port for program output
 
 #define WAYPOINT_COUNT 19
@@ -10,13 +10,15 @@ int excel_waypoints[19][2] = {{96,2456}, {3774,2673}, {8926,2266}, {12349,2266},
 
 #ifdef MM
 //WAYPOINT AND SPEED PARAMETERS
+// 2015 speeds: 1st waypoint 1780, discombobulator 1820, regular speed 1650
 #define WAYPOINT_ACCEPT 185	//waypoint acceptance radius in inches
-#define S1 1500				// some default values:
-#define S2 1600				//"moderate/slow" speed  1600
+#define SPEED1 1500				// some default values:
+#define SPEED2 1600				//"moderate/slow" speed  1600
 							//S1 1500, S2 1560, S3 1580, S4 2000, SB 1250
-#define S3 1780				//This is the speed for negotiating wp's 1600
-#define S4 1650 			//fast speed 1650
-#define SB 1300				//breaking speed default 1300
+#define SPEED3 1650				//This is the speed for negotiating wp's 1600
+#define SPEED4 1780 			//fast speed 1650
+#define SPEED5 1820
+#define SPEEDB 1300				//breaking speed default 1300
 #define P1 50				//proximity to allow car to align with next waypoint in inches
 #define P2 100				//close proximity to waypoint in inches
 #define P3 625				//far proximity to waypoint in inches

@@ -67,9 +67,9 @@ void steering_calibration(){
 	delay(250);
 	esc.attach(THROTTLE);
 	delay(1000);
-	esc.writeMicroseconds(S1);
+	esc.writeMicroseconds(SPEED1);
 	delay(1000);
-	esc.writeMicroseconds(S2);
+	esc.writeMicroseconds(SPEED2);
 	
 	while(mode != AUX){
 		read_FIFO();
@@ -168,7 +168,7 @@ void mode_test(){
 				delay(250);
 				esc.attach(THROTTLE);
 				delay(250);
-				esc.writeMicroseconds(S1);
+				esc.writeMicroseconds(SPEED1);
 				attached = true;
 			}
 		}

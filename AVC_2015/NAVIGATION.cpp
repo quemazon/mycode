@@ -104,14 +104,14 @@ void cal_wp_accept(){
 #ifdef MM
 void speed(){
 	running = true;			// make sure running is updated.
-	if (wpr_count == 1) esc.writeMicroseconds(S3);				//first waypoint speed
-	else if (wpr_count == 4) esc.writeMicroseconds(1820);		//set speed for discombobulator
-	else if (wpr_count == 5) esc.writeMicroseconds(1820);		//set speed for discombobulator
+	if (wpr_count == 1) esc.writeMicroseconds(SPEED4);				//first waypoint speed
+	else if (wpr_count == 4) esc.writeMicroseconds(SPEED5);		//set speed for discombobulator
+	else if (wpr_count == 5) esc.writeMicroseconds(SPEED5);		//set speed for discombobulator
 	else{
 		angle_diff = angle_diff * 180.0/3.14159;
 		angle_diff = abs(angle_diff);
-		if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(S4);
-		else esc.writeMicroseconds(S2);
+		if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(SPEED3);
+		else esc.writeMicroseconds(SPEED2);
 	}
 	return ;
 }
@@ -200,11 +200,11 @@ On the reciever side, simply wait for packets, and write them to the serial port
 void print_parameters(){
 	SERIAL_OUT.print('p');
 	SERIAL_OUT.print(wp_accept); SERIAL_OUT.print(',');
-	SERIAL_OUT.print(S1); SERIAL_OUT.print(',');
-	SERIAL_OUT.print(S2); SERIAL_OUT.print(',');
-	SERIAL_OUT.print(S3); SERIAL_OUT.print(',');
-	SERIAL_OUT.print(S4); SERIAL_OUT.print(',');
-	SERIAL_OUT.print(SB); SERIAL_OUT.print(',');
+	SERIAL_OUT.print(SPEED1); SERIAL_OUT.print(',');
+	SERIAL_OUT.print(SPEED2); SERIAL_OUT.print(',');
+	SERIAL_OUT.print(SPEED3); SERIAL_OUT.print(',');
+	SERIAL_OUT.print(SPEED4); SERIAL_OUT.print(',');
+	SERIAL_OUT.print(SPEEDB); SERIAL_OUT.print(',');
 	SERIAL_OUT.print(P1); SERIAL_OUT.print(',');
 	SERIAL_OUT.print(P2); SERIAL_OUT.print(',');
 	SERIAL_OUT.print(P3); SERIAL_OUT.print(',');
