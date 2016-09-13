@@ -126,13 +126,13 @@ void speed(){
 }
 #endif
 
-#ifdef RR
+#ifdef TH
 void speed(){
 	running = true;			// make sure running is updated.
 	angle_diff = angle_diff * 180.0/3.14159;
 	angle_diff = abs(angle_diff);
-	if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(S4);
-	else esc.writeMicroseconds(S2);
+	if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(SPEED4);
+	else esc.writeMicroseconds(SPEED2);
 	return ;
 }
 #endif
