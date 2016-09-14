@@ -5,50 +5,41 @@
 
 
 //INTERNAL VARIABLES
+byte wpc;
 int steer_us;
-double x_wp = 0, y_wp = 0, x_wp0 = 0, y_wp0 = 0;
-double target_x=0, target_y=0;
-double angle_last, angle_target, angle_vtp, x=0, y=0, speed_mph;
+double angle_last, angle_target, angle_vtp, speed_mph;
 static int steer_limm = SERVO_LIM;
 
 static int wp_accept = 50;
-//static double cross_product=0;
 static double angle_diff;
 static long speed_cur=0, speed_new=0, speed_old=0;
 static long proximity, previous_proximity=50;
 
 
 //EXTERNAL VARIABLES
-extern double angle;
+extern double angle, x, y;
 extern bool running;
-extern byte wpr_count;
-
+extern position_structure wp[20];
 
 //OBJECT DECLARATIONS
 extern Servo steering, esc;
-extern position_structure waypoint;
 
 
 //PROGRAM FUNCTIONS
 void update_waypoint(){
 	//waypoint acceptance and move to next waypoint
 	if(proximity < (wp_accept)){
-		x_wp0 = x_wp;
-		y_wp0 = y_wp;
-		wpr_count++;
-		EEPROM_readAnything(wpr_count*WP_SIZE, waypoint);
-		x_wp = waypoint.x;
-		y_wp = waypoint.y;
+		wpc++;
 		SERIAL_OUT.print("#");
-		SERIAL_OUT.print(wpr_count);
+		SERIAL_OUT.print(wpc);
 		SERIAL_OUT.print(",");
-		SERIAL_OUT.print(x_wp);
+		SERIAL_OUT.print(wp[wpc].x);
 		SERIAL_OUT.print(",");
-		SERIAL_OUT.println(y_wp);
-		double temp = pow((x_wp-x),2);
-		temp += pow((y_wp-y),2);
+		SERIAL_OUT.println(wp[wpc].y);
+		double temp = pow((wp[wpc].x-x),2);
+		temp += pow((wp[wpc].y-y),2);
 		proximity = sqrt(temp);
-		//proximity = sqrt(pow((x_wp - x),2) + pow((y_wp - y),2));	
+		//proximity = sqrt(pow((wp[wpc].x - x),2) + pow((wp[wpc].y - y),2));	
 		previous_proximity = proximity;
 	}
 	
@@ -80,11 +71,10 @@ void update_position(){
 	//calculate position
 	x += CLICK_INCHES * sin(angle);
 	y += CLICK_INCHES * cos(angle);
-	angle_target = atan2((x_wp - x),(y_wp - y));
-	double temp = pow((x_wp-x),2);
-	temp += pow((y_wp-y),2);
+	angle_target = atan2((wp[wpc].x - x),(wp[wpc].y - y));
+	double temp = pow((wp[wpc].x-x),2);
+	temp += pow((wp[wpc].y-y),2);
 	proximity = sqrt(temp);
-	//proximity = sqrt(pow((x_wp - x),2) + pow((y_wp - y),2));	
 	return ;
 }
 
@@ -104,15 +94,10 @@ void cal_wp_accept(){
 #ifdef MM
 void speed(){
 	running = true;			// make sure running is updated.
-	if (wpr_count == 1) esc.writeMicroseconds(SPEED4);				//first waypoint speed
-	else if (wpr_count == 4) esc.writeMicroseconds(SPEED5);		//set speed for discombobulator
-	else if (wpr_count == 5) esc.writeMicroseconds(SPEED5);		//set speed for discombobulator
-	else{
-		angle_diff = angle_diff * 180.0/3.14159;
-		angle_diff = abs(angle_diff);
-		if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(SPEED3);
-		else esc.writeMicroseconds(SPEED2);
-	}
+	angle_diff = angle_diff * 180.0/3.14159;
+	angle_diff = abs(angle_diff);
+	if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(wp[wpc].speed);
+	else esc.writeMicroseconds(SPEED2);
 	return ;
 }
 #endif
@@ -165,13 +150,13 @@ void calculate_speed(){
 
 void calculate_look_ahead(){
 	//int time = micros();
-	double Ru = sqrt(pow(x - x_wp0,2) + pow(y - y_wp0,2));
-	double theta = atan2(y_wp - y_wp0, x_wp - x_wp0);
-	double theta_u = atan2(y - y_wp0, x - x_wp0);
+	double Ru = sqrt(pow(x - wp[wpc-1].x,2) + pow(y - wp[wpc-1].y,2));
+	double theta = atan2(wp[wpc].y - wp[wpc-1].y, wp[wpc].x - wp[wpc-1].x);
+	double theta_u = atan2(y - wp[wpc-1].y, x - wp[wpc-1].x);
 	double beta = theta - theta_u;
 	double R = sqrt(pow(Ru,2) - pow(Ru*sin(beta),2));
-	double x_vtp = (R+LOOK_AHEAD)*cos(theta) +x_wp0;
-	double y_vtp = (R+LOOK_AHEAD)*sin(theta) +y_wp0;
+	double x_vtp = (R+LOOK_AHEAD)*cos(theta) +wp[wpc-1].x;
+	double y_vtp = (R+LOOK_AHEAD)*sin(theta) +wp[wpc-1].y;
 	angle_vtp = atan2((x_vtp - x), (y_vtp - y));
 }
 
@@ -244,9 +229,9 @@ void print_coordinates(){ //print target, location, etc.
 	SERIAL_OUT.print(x);
 	SERIAL_OUT.print(" , ");
 	SERIAL_OUT.print(y);	SERIAL_OUT.print("   trgt: ");
-	SERIAL_OUT.print(x_wp);
+	SERIAL_OUT.print(wp[wpc].x);
 	SERIAL_OUT.print(" , ");
-	SERIAL_OUT.print(y_wp);
+	SERIAL_OUT.print(wp[wpc].y);
 	SERIAL_OUT.print(" , ");
 	SERIAL_OUT.println(steer_limm);
 //	SERIAL_OUT.println(angle_diff);

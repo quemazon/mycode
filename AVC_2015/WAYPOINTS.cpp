@@ -5,41 +5,37 @@
 
 
 //INTERNAL VARIABLES
-byte wpr_count=1;
-static byte wpw_count=1;
-
 
 //EXTERNAL VARIABLES
 extern int mode;
 extern double x, y;
-
+extern byte wpc;
+extern position_structure wp[20];
 
 //OBJECT DECLARATIONS
-position_structure waypoint;
-
-
+/* position_structure waypoint_struc;
+ */
 //PROGRAM FUNCTIONS
 void set_waypoint(){ //CLEAR
-	waypoint.x = x;
-	waypoint.y = y;
-	//waypoint.last = false
-	EEPROM_writeAnything(wpw_count*WP_SIZE, waypoint);
+	if (wpc == 1) eeprom_clear();
+	wp[wpc].x = x;
+	wp[wpc].y = y;
+	wp[wpc].speed = SPEED3;
+	EEPROM_writeAnything(256, wp);
 	SERIAL_OUT.print("set WP #");
-	SERIAL_OUT.print(wpw_count);
+	SERIAL_OUT.print(wpc);
 	SERIAL_OUT.print(": ");
-	SERIAL_OUT.print(waypoint.x);
+	SERIAL_OUT.print(wp[wpc].x);
 	SERIAL_OUT.print(" , ");
-	SERIAL_OUT.println(waypoint.y);
-
-	wpw_count++;
+	SERIAL_OUT.println(wp[wpc].y);
+	wpc++;
 	while(mode == WP_MODE) get_mode();
 
 	return ;
 }
 
 void read_waypoint(){ //CLEAR
-	EEPROM_readAnything(wpr_count*WP_SIZE, waypoint);
-	
+	EEPROM_readAnything(256, wp);
 	return ;
 }
 
@@ -54,7 +50,7 @@ void eeprom_clear(){  // CLEAR  //EEPROM Clear
 	return ;
 }
 
-void import_waypoints(){
+/* void import_waypoints(){
 	eeprom_clear();
 	
 	wpw_count = 1;	//resets the counter to import correctly
@@ -74,25 +70,24 @@ void import_waypoints(){
 
 	return ;
 }
+ */
 
-void display_waypoints(){
+ void display_waypoints(){
 	SERIAL_OUT.println();
 	
-	for(int i=1; i <= WAYPOINT_COUNT; i++){
-		EEPROM_readAnything(i*WP_SIZE, waypoint);
-
+	for(int i=0; i <= WAYPOINT_COUNT; i++){
 		Serial.print(i);
 		Serial.print(": ");
-		Serial.print(waypoint.x);
+		Serial.print(wp[i].x);
 		Serial.print(" , ");
-		Serial.println(waypoint.y);
+		Serial.println(wp[i].y);
 
 		Serial2.print("#");
 		Serial2.print(i);
 		Serial2.print(",");
-		Serial2.print(waypoint.x);
+		Serial2.print(wp[i].x);
 		Serial2.print(",");
-		Serial2.println(waypoint.y);
+		Serial2.println(wp[i].y);
 	}
 
 	SERIAL_OUT.println();
@@ -100,7 +95,7 @@ void display_waypoints(){
 	return ;
 }
 
-void edit_waypoint(){
+/* void edit_waypoint(){
 	while(1){
 		display_waypoints();
 		SERIAL_OUT.println();
@@ -158,3 +153,4 @@ void edit_waypoint(){
 	
 	return ;
 }
+ */

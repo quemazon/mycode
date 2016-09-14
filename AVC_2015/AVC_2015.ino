@@ -25,16 +25,14 @@ The sketch is parsed for include files. The sketch, all included header files, a
 bool running = false, first = true;
 volatile int clicks = 0;
 int mode = MANUAL;
+double x, y;
+position_structure wp[20];
 
 
 //EXTERNAL VARIABLES
-extern byte wpr_count;
+extern byte wpc;
 extern int steer_us;
 extern long accum; //this is ONLY used to reset the 0 the gyro angle for real (setting angle to 0 does nothing!!! (never forget last year's debacle))
-extern double x_wp, y_wp;
-extern double target_x, target_y;
-extern double x, y;
-extern position_structure waypoint;
 
 
 //OBJECT DECLARATIONS
@@ -58,22 +56,23 @@ void reset_requested_interrupt(){
 }
 
 void navigate(){
-	calculate_speed();
+	//calculate_speed();
 	//map_rates();
 	//cal_steer_lim();
-	cal_wp_accept();
-	update_position();
-	update_waypoint();
-	calculate_look_ahead();
-	update_steering();
+	//cal_wp_accept();
+	//update_position();
+	//update_waypoint();
+	//calculate_look_ahead();
+	//update_steering();
 	get_mode();
 	if(mode == AUTOMATIC){
 		steering.writeMicroseconds(steer_us);
 		speed();
 		//esc.writeMicroseconds(S4);       // !!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!! NEEDS TO BE REMOVED WHEN DONE WITH TESTING
 	}
-	print_data();
+	//print_data();
 	//print_coordinates();
+	SERIAL_OUT.println("click!");
 	return ;
 }
 
@@ -151,19 +150,13 @@ void race_startup_routine(){
 	}
 
 	//the following zeros out everything and sets the waypoint and counter
-	wpr_count = 1;		//set waypoint read counter to first waypoint
-	EEPROM_readAnything(wpr_count*WP_SIZE, waypoint);
-	x_wp = waypoint.x;
-	y_wp = waypoint.y;
-
-	x=0;
-	y=0;
+	wpc = 1;		//set waypoint read counter to first waypoint
+	x=wp[0].x;
+	y=wp[0].y;
 	reset_FIFO();
 	accum=0;			//***ZEROS out the accumulator which zeros out the gyro angle
 	clicks = 0;
 	first = true;
-	target_x = x_wp;
-	target_y = y_wp;
 
 	return;
 }
@@ -205,19 +198,13 @@ void wp_setup_routine(){
 	}
 
 	//the following zeros out everything and sets the waypoint and counter
-	wpr_count = 1;		//set waypoint read counter to first waypoint
-	EEPROM_readAnything(wpr_count*WP_SIZE, waypoint);
-	x_wp = waypoint.x;
-	y_wp = waypoint.y;
-
-	x=0;
-	y=0;
+	wpc = 1;		//set waypoint read counter to first waypoint
+	x=wp[0].x;
+	y=wp[0].y;
 	reset_FIFO();
 	accum=0;			//***ZEROS out the accumulator which zeros out the gyro angle
 	clicks = 0;
 	first = true;
-	target_x = x_wp;
-	target_y = y_wp;
 
 	digitalWrite(LED_BUILTIN, HIGH);	//this is used to indicate that the car is ready to run
 
@@ -234,6 +221,7 @@ void setup(){
 	SERIAL_OUT.println(CAR_NAME);
 	SERIAL_OUT.println();
 
+	EEPROM_readAnything(256, wp);
 	//Pin assignments:
 	pinMode(MODE_LINE_1, INPUT);
 	pinMode(MODE_LINE_2, INPUT);
@@ -256,7 +244,6 @@ void setup(){
 	
 	bool bypass_menu = false;
 	pinMode(LED_BUILTIN, OUTPUT);
-	long temp_time = millis();
 	for(int i = 0; i<8; i++){
 		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 		delay(500);
@@ -304,10 +291,13 @@ void loop(){
 			read_FIFO();
 		}
 
-		if((millis() - temp) > 500) set_waypoint();
+		if((millis() - temp) > 500){
+			set_waypoint();
+			SERIAL_OUT.println("print!");
+		}
 	}
 
-	if((wpr_count >= WAYPOINT_COUNT) || (((int)x_wp == 0) && ((int)y_wp == 0))){	//this locks the car into this loop and makes it go slow when we've reached the max waypoints OR the waypoints are 0,0
+	if((wpc >= WAYPOINT_COUNT) || (((int)wp[wpc].x == 0) && ((int)wp[wpc].y == 0))){	//this locks the car into this loop and makes it go slow when we've reached the max waypoints OR the waypoints are 0,0
 		esc.writeMicroseconds(SPEED2);
 		while(true);
 	}

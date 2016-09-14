@@ -98,6 +98,7 @@ to (*old_pos).x.*/
 
 	double x;
 	double y;
+	int speed;
 	//boolean last;
 };
 

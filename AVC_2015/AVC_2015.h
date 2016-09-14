@@ -1,5 +1,5 @@
 //AVC SETTINGS
-#define TH			//use either MM (minuteman) or RR (roadrunner)
+#define MM			//use either MM (minuteman) or RR (roadrunner)
 #define BLUETOOTH 	//use either BLUETOOTH or USB to define the serial port for program output
 
 #define WAYPOINT_COUNT 19
