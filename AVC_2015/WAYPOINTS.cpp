@@ -17,7 +17,13 @@ extern position_structure wp[20];
  */
 //PROGRAM FUNCTIONS
 void set_waypoint(){ //CLEAR
-	if (wpc == 1) eeprom_clear();
+	if (wpc == 1){
+		for(int i=0; i <= WAYPOINT_COUNT; i++){
+			wp[i].x = 0;
+			wp[i].y = 0;
+			wp[i].speed = SPEED3;
+		}
+	}
 	wp[wpc].x = x;
 	wp[wpc].y = y;
 	wp[wpc].speed = SPEED3;

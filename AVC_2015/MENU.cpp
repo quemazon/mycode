@@ -58,7 +58,7 @@ void main_menu(){
 		if(SERIAL_OUT.available() > 0){
 	 		switch(SERIAL_OUT.read()){
 				case 'd':
-					//display_waypoints();
+					display_waypoints();
 					menu_choices();
 					break;
 				case 'e':

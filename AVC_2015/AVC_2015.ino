@@ -60,7 +60,7 @@ void navigate(){
 	//map_rates();
 	//cal_steer_lim();
 	//cal_wp_accept();
-	//update_position();
+	update_position();
 	//update_waypoint();
 	//calculate_look_ahead();
 	//update_steering();
@@ -70,7 +70,7 @@ void navigate(){
 		speed();
 		//esc.writeMicroseconds(S4);       // !!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!! NEEDS TO BE REMOVED WHEN DONE WITH TESTING
 	}
-	//print_data();
+	print_data();
 	//print_coordinates();
 	SERIAL_OUT.println("click!");
 	return ;
@@ -259,6 +259,8 @@ void setup(){
 	SERIAL_OUT.println("initialize");
 	print_parameters();
 	display_waypoints();
+	SERIAL_OUT.println("here we go!");
+	
 }
 
 void loop(){
@@ -297,14 +299,14 @@ void loop(){
 		}
 	}
 
-	if((wpc >= WAYPOINT_COUNT) || (((int)wp[wpc].x == 0) && ((int)wp[wpc].y == 0))){	//this locks the car into this loop and makes it go slow when we've reached the max waypoints OR the waypoints are 0,0
+/* 	if((wpc >= WAYPOINT_COUNT) || (((int)wp[wpc].x == 0) && ((int)wp[wpc].y == 0))){	//this locks the car into this loop and makes it go slow when we've reached the max waypoints OR the waypoints are 0,0
 		esc.writeMicroseconds(SPEED2);
 		while(true);
 	}
-	
-	static long time = 0;
+ */	
+/* 	static long time = 0;
 	if((millis() - time) > 500){
 		//print_coordinates();
 		time = millis();
 	}
-}
+ */}
