@@ -101,6 +101,20 @@ void eeprom_clear(){  // CLEAR  //EEPROM Clear
 	return ;
 }
 
+void print_all(){
+	for(int i=0; i <= WAYPOINT_COUNT; i++){
+		SERIAL_OUT.print(wp[i].x);
+		SERIAL_OUT.print(',');
+		SERIAL_OUT.print(wp[i].y);
+		SERIAL_OUT.print(',');
+		SERIAL_OUT.print(wp[i].speed);
+		SERIAL_OUT.print(';');
+	}
+	SERIAL_OUT.println();
+
+	return ;
+}
+
 /* void edit_waypoint(){
 	while(1){
 		display_waypoints();

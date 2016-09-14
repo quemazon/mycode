@@ -294,11 +294,19 @@ class wp():
         self.s = 0
         
 def read_wp():
+#    ser = serial.Serial(9, 115200, timeout=5)
+    ser.flushInput()
+    ser.write('#')
+    biglist = ser.readline().split(';')
+    #print tmp1
+    #return tmp1
     wps = []
     for i in arange(20):
+        individual = biglist[i].split(',')
         tmp = wp()
-        tmp.x =
-        tmp.y =
-        tmp.s =
-        wps.append(wp())        
+        tmp.x = float(individual[0])
+        tmp.y = float(individual[1])
+        tmp.s = int(individual[2])
+        wps.append(tmp)        
+ #   ser.close()
     return wps

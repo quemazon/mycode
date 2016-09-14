@@ -228,7 +228,7 @@ def plot_data():
     plt.show()
 
 def plot_xy():
-    from pylab import *
+    import pylab
 
     #t = arange(0.0, 2.0, 0.01)
     #s = sin(2*pi*t)

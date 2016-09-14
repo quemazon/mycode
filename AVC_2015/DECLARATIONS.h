@@ -24,6 +24,7 @@ void eeprom_clear();
 void import_waypoints();
 void display_waypoints();
 void edit_waypoint();
+void print_all();
 
 
 //NAVIGATION FUNCTIONS

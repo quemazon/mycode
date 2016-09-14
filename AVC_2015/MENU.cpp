@@ -117,7 +117,10 @@ void main_menu(){
 					servo_test();
 					menu_choices();
 					break;
-
+				case '#':
+					print_all();
+					menu_choices();
+					break;
 				case 'x':
 					SERIAL_OUT.println();
 					SERIAL_OUT.println();
