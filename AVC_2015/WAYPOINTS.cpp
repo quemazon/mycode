@@ -115,6 +115,16 @@ void print_all(){
 	return ;
 }
 
+void import_waypoints(){
+	for(int i=0; i <= WAYPOINT_COUNT; i++){
+		wp[i].x = (float)SERIAL_OUT.parseInt();
+		wp[i].y = (float)SERIAL_OUT.parseInt();
+		wp[i].speed = (float)SERIAL_OUT.parseInt();
+	}
+	EEPROM_writeAnything(256, wp);
+
+}
+
 /* void edit_waypoint(){
 	while(1){
 		display_waypoints();

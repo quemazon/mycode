@@ -65,8 +65,8 @@ void main_menu(){
 					//edit_waypoint();
 					menu_choices();
 					break;
-				case 'i':
-					//import_waypoints();
+				case '@':
+					import_waypoints();
 					menu_choices();
 					break;
 

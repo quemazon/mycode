@@ -20,14 +20,14 @@ import serial
 from random import *
 from pylab import*
 from Tkinter import *
-
+from time import sleep
 def callback():
     print "click!"
     print e.get()
 
-def openserial():
+def openserial(port):
     global ser
-    ser = serial.Serial(int(e.get())-1, 115200, timeout=5)
+    ser = serial.Serial(port, 115200, timeout=5)
 
 def closeserial():
     ser.close()
@@ -227,86 +227,71 @@ def plot_data():
     plt.draw()
     plt.show()
 
-def plot_xy():
-    import pylab
+def plot_xy(data):
+    import matplotlib.pyplot as plt
     #t = arange(0.0, 2.0, 0.01)
     #s = sin(2*pi*t)
-    plot(d.x, d.y)
+    x = []
+    y = []
+    pt = []
+    for counter, value in enumerate(data):
+       x.append(value[0])
+       y.append(value[1])
+       pt.append(counter)
+    plt.plot(x, y, 'o')
+    for i in pt:
+    #(x, y) = DATA[i]
+    #(dd, dl, r, dr, dp) = dash_style[i]
+    #print('dashlen call %d' % dl)
+        plt.text(x[i]+3, y[i]+3, str(i))
 
-    xlabel('time (s)')
-    ylabel('voltage (mV)')
+
     title('X, Y Inches')
     grid(True)
-    savefig("test.png")
     show()
 
-
-def save_data():
+def save_file(data):
     import pickle
     from tkFileDialog import asksaveasfilename
+    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
     filename = asksaveasfilename()
-    pickle.dump(d, open(filename, "wb" ))
+    pickle.dump(data, open(filename, "wb" ))
 
-def load_data():
+def load_file():
     import pickle
     from tkFileDialog import askopenfilename
     filename = askopenfilename()
-    global d
-    d = pickle.load(open(filename, "rb"))
+    return pickle.load(open(filename, "rb"))
 
-def a_window():
-    master = Tk()
-    b = Button(master, text="Connect", command=openserial)
-    b.pack()
-    e = Entry(master)
-    e.pack()
-    e.delete(0, END)
-    e.insert(0, "24")
-    c = Button(master, text="Get Data", command=get_data)
-    c.pack()
-
-    f = Button(master, text="Close Port", command=closeserial)
-    f.pack()
-
-    g = Button(master, text="Plot Data", command=plot_data)
-    g.pack()
-
-    h = Button(master, text="Save Data", command=save_data)
-    h.pack()
-
-    i = Button(master, text="Load Data", command=load_data)
-    i.pack()
-
-    j = Button(master, text="Filter Data", command=filter_data)
-    j.pack()
-
-    k = Button(master, text="Plot x,y", command=plot_xy)
-    k.pack()
-
-    temp = None
-    d = DataSet()
-    #wait_init()
-
-class wp():
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.s = 0
+def export_wp(wps):
+    wps = wps[:20]
+    ser.flushOutput()
+    ser.write('@')
+    sleep(.3)
+    for i in wps:
+        ser.write(str(i[0]))
+        ser.write('!')
+        ser.write(str(i[1]))
+        ser.write('!')
+        ser.write(str(i[2]))
+        ser.write('!')
         
+             
 def read_wp():
 #    ser = serial.Serial(9, 115200, timeout=5)
     ser.flushInput()
     ser.write('#')
     biglist = ser.readline().split(';')
+    biglist = biglist[:20] #delet last element, which isn't a wp
     #print tmp1
     #return tmp1
     wps = []
     for i in arange(20):
         individual = biglist[i].split(',')
-        tmp = wp()
-        tmp.x = float(individual[0])
-        tmp.y = float(individual[1])
-        tmp.s = int(individual[2])
+        tmp = []
+        tmp.append(int(float(individual[0])))
+        tmp.append(int(float(individual[1])))
+        tmp.append(int(individual[2]))
         wps.append(tmp)        
  #   ser.close()
     return wps
