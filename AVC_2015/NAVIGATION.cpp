@@ -36,11 +36,11 @@ void update_waypoint(){
 		SERIAL_OUT.print(wp[wpc].x);
 		SERIAL_OUT.print(",");
 		SERIAL_OUT.println(wp[wpc].y);
-		double temp = pow((wp[wpc].x-x),2);
-		temp += pow((wp[wpc].y-y),2);
-		proximity = sqrt(temp);
+		//double temp = pow((wp[wpc].x-x),2);
+		//temp += pow((wp[wpc].y-y),2);
+		//proximity = sqrt(temp);
 		//proximity = sqrt(pow((wp[wpc].x - x),2) + pow((wp[wpc].y - y),2));	
-		previous_proximity = proximity;
+		//previous_proximity = proximity;
 	}
 	
 	return ;
@@ -144,7 +144,7 @@ void calculate_speed(){
 	speed_mph = CLICK_INCHES * 56818.0 / speed_cur;
 	//SERIAL_OUT.println(speed_cur);
 	//cal_steer_lim();
-	cal_wp_accept();
+	//cal_wp_accept();
 	return ;
 }
 

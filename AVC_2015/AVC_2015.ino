@@ -56,14 +56,14 @@ void reset_requested_interrupt(){
 }
 
 void navigate(){
-	//calculate_speed();
+	calculate_speed();
 	//map_rates();
 	//cal_steer_lim();
-	//cal_wp_accept();
+	cal_wp_accept();
 	update_position();
-	//update_waypoint();
-	//calculate_look_ahead();
-	//update_steering();
+	update_waypoint();
+	calculate_look_ahead();
+	update_steering();
 	get_mode();
 	if(mode == AUTOMATIC){
 		steering.writeMicroseconds(steer_us);
@@ -72,7 +72,7 @@ void navigate(){
 	}
 	print_data();
 	//print_coordinates();
-	SERIAL_OUT.println("click!");
+	//SERIAL_OUT.println("click!");
 	return ;
 }
 
@@ -220,7 +220,7 @@ void setup(){
 	SERIAL_OUT.setTimeout(100000);
 	SERIAL_OUT.println(CAR_NAME);
 	SERIAL_OUT.println();
-
+	//eeprom_clear();
 	EEPROM_readAnything(256, wp);
 	//Pin assignments:
 	pinMode(MODE_LINE_1, INPUT);
