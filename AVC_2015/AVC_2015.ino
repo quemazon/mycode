@@ -251,11 +251,17 @@ void setup(){
 		if(mode == WP_MODE) bypass_menu = true;
 	}
 
-	if(bypass_menu) wp_setup_routine();
-	else{
+	if(bypass_menu){
 		main_menu();
 		race_startup_routine();
 	}
+	else{} wp_setup_routine();
+/* 	else{
+		main_menu();
+		race_startup_routine();
+	}
+ */	
+ 
 	SERIAL_OUT.println("initialize");
 	print_parameters();
 	display_waypoints();

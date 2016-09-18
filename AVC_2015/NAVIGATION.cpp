@@ -91,7 +91,6 @@ void cal_wp_accept(){
 	return ;
 }
 
-#ifdef MM
 void speed(){
 	running = true;			// make sure running is updated.
 	angle_diff = angle_diff * 180.0/3.14159;
@@ -100,28 +99,19 @@ void speed(){
 	else esc.writeMicroseconds(SPEED2);
 	return ;
 }
-#endif
 
-#ifdef QF
-void speed(){
-	running = true;			// make sure running is updated.
-	if (speed_mph < 13) esc.writeMicroseconds(1575);
-	else esc.writeMicroseconds(1550);
-	return ;
-}
-#endif
-
+/* 
 #ifdef TH
 void speed(){
 	running = true;			// make sure running is updated.
 	angle_diff = angle_diff * 180.0/3.14159;
 	angle_diff = abs(angle_diff);
-	if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(SPEED4);
+	if (angle_diff < SPEED_TOGGLE_ANGLE)  esc.writeMicroseconds(wp[wpc].speed);
 	else esc.writeMicroseconds(SPEED2);
 	return ;
 }
-#endif
-
+ #endif
+*/
 void update_steering(){
 	// calculate and write angles for steering
 	angle_diff = angle_target - angle;
